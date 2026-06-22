@@ -1,20 +1,19 @@
 import { createContext, useContext } from "react";
-// OccHealth Pro SA — config, colour tokens, localStorage keys
-export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "YOUR_PROJECT";
-export const SUPABASE_ANON = import.meta.env.VITE_SUPABASE_ANON || "YOUR_ANON_KEY";
-export const USE_MOCK = SUPABASE_URL.includes("YOUR_PROJECT");
+
+// Physio Pro SA — config
+// Supabase credentials hardcoded as fallback — env vars take precedence if set
+export const SUPABASE_URL  = import.meta.env.VITE_SUPABASE_URL  || "https://ezkrzptsnkdolsdjhgql.supabase.co";
+export const SUPABASE_ANON = import.meta.env.VITE_SUPABASE_ANON || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6a3J6cHRzbmtkb2xzZGpoZ3FsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNDM3MTEsImV4cCI6MjA5NzcxOTcxMX0.cm8TfV2ap5BqUhYvq3isfsztuo8bb5mOgU1x3AdjY5E";
+export const USE_MOCK = false;
 export const VAT_RATE = 0.15;
 export const APP_VERSION = "0.1.0";
 
-// localStorage namespace
 export const LS = {
-  SESSION: "oh_session",
-  MODULES: "oh_modules",
-  PRACTICE: "oh_practice",
-  SIGNED_NOTES: "oh_signed_notes",
+  SESSION:      "ph_session",
+  MODULES:      "ph_modules",
+  PRACTICE:     "ph_practice",
+  SIGNED_NOTES: "ph_signed_notes",
 };
 
-// ─── AUTH CONTEXT ─────────────────────────────────────────────────────────────
 export const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
-
