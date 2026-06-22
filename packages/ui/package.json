@@ -1,0 +1,17 @@
+{
+  "name": "@prosa/ui",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./src/index.jsx",
+  "exports": {
+    ".": "./src/index.jsx",
+    "./ui": "./src/ui.jsx",
+    "./formui": "./src/formui.jsx",
+    "./navigation": "./src/navigation.jsx"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "@prosa/core": "*"
+  },
+  "devDependencies": {}
+}
