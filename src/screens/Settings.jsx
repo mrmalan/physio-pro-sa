@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { C, Card, Btn } from "../shared.js";
-import { SWITCH_STATUS, SWITCH_ACCREDITATION_STEPS } from "@prosa/core";
+import { SWITCH_STATUS, SWITCH_ACCREDITATION_STEPS } from "../shared.js";
 
 const PH_PRACTICE_KEY = "ph_practice";
 const DEFAULTS = {

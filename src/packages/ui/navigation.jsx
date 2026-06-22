@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, createContext, useContext } from "react";
 import { Badge, Btn } from "./ui.jsx";
-import { C, USE_MOCK } from "@prosa/core";
+import { C, USE_MOCK } from "../core/mockdata.js";
 
 // OccHealth Pro SA — Navigation: NAV_OHP, NAV_EMPLOYER, Sidebar, TopBar
 export const NAV_OHP = [

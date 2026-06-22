@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { DataContext, C, Card, Btn, Badge } from "../shared.js";
-import { SA_SCHEMES, CLAIM_STATUSES, claimStatusLabel, claimStatusColor, generateClaimCSV } from "@prosa/core";
+import { SA_SCHEMES, CLAIM_STATUSES, claimStatusLabel, claimStatusColor, generateClaimCSV } from "../shared.js";
 
 export const MedicalAid = ({ navigate }) => {
   const { claims, patients, episodes } = useContext(DataContext);

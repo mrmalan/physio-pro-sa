@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo, createContext, useContext } from "react";
 import { Badge, Btn, Card, SectionTitle, StatCard } from "./ui.jsx";
-import { C, getStyleExamples, useData } from "@prosa/core";
+import { C } from "../core/mockdata.js";
+import { getStyleExamples } from "../core/audit.js";
+import { useData } from "../core/hooks.js";
 
 // OccHealth Pro SA — form UI components
 // Field, Input, Select, Textarea

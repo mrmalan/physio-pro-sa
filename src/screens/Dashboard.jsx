@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { DataContext, AuthContext, C, Card, StatCard, Badge } from "../shared.js";
-import { benefitAlert } from "@prosa/core";
+import { benefitAlert } from "../shared.js";
 
 export const Dashboard = ({ navigate, session }) => {
   const { patients, episodes, appointments, claims } = useContext(DataContext);

@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { DataContext, C, Card, Btn, Badge } from "../shared.js";
-import { SA_SCHEMES, USE_MOCK } from "@prosa/core";
+import { SA_SCHEMES, USE_MOCK } from "../shared.js";
 
 // ── Shared styles ─────────────────────────────────────────────────────────────
 const inp = { width: "100%", padding: "8px 10px", border: `1px solid ${C.border}`,

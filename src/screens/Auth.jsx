@@ -7,7 +7,7 @@ import { APP_VERSION, Btn, C, SUPABASE_ANON, SUPABASE_URL, USE_MOCK, auth } from
 
 
 // Supabase client with auth token support
-export { sbAuth } from "@prosa/core";
+export { sbAuth } from "../shared.js";
 
 // ─── ONBOARDING WIZARD ────────────────────────────────────────────────────────
 export const OnboardingWizard = ({ session, onComplete }) => {

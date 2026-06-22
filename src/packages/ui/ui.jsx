@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, createContext, useContext } from "react";
-import { C } from "@prosa/core";
+import { C } from "../core/mockdata.js";
 
 // OccHealth Pro SA — shared UI primitives
 // Badge, Card, SectionTitle, Btn, StatCard
