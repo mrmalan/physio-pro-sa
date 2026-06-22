@@ -6,8 +6,8 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@prosa/core": path.resolve(__dirname, "../../packages/core/src/index.js"),
-      "@prosa/ui":   path.resolve(__dirname, "../../packages/ui/src/index.jsx"),
+      "@prosa/core": path.resolve(__dirname, "src/packages/core/index.js"),
+      "@prosa/ui":   path.resolve(__dirname, "src/packages/ui/index.jsx"),
     },
   },
   build: {

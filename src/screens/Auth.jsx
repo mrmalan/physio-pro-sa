@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, createContext, useContext 
 // Screen imports removed — Physio Pro uses its own screens via App.jsx
 
 // Physio Pro SA — Auth helpers, Onboarding Wizard, Login screen
-import { APP_VERSION, Btn, C, SUPABASE_ANON, SUPABASE_URL, USE_MOCK } from "../shared.js";
+import { APP_VERSION, Btn, C, SUPABASE_ANON, SUPABASE_URL, USE_MOCK, auth } from "../shared.js";
 
 
 
@@ -254,7 +254,7 @@ export const LoginScreen = ({ onLogin }) => {
       const user = await auth.getUser(signInData.access_token);
       onLogin({ ...signInData, user });
     } else {
-      setError("Account created. Check your email to confirm, then sign in.");
+      setError("Account created — please sign in.");
     }
     setLoading(false);
   };
@@ -277,7 +277,7 @@ export const LoginScreen = ({ onLogin }) => {
       const user = await auth.getUser(signInData.access_token);
       onLogin({ ...signInData, user });
     } else {
-      setError("Account created. Check your email to confirm, then sign in.");
+      setError("Account created — please sign in.");
     }
     setLoading(false);
   };
@@ -287,7 +287,7 @@ export const LoginScreen = ({ onLogin }) => {
       <div style={{ background: "#fff", borderRadius: 14, padding: "1.5rem", width: "100%", maxWidth: 380, boxSizing: "border-box" }}>
         <div style={{ textAlign: "center", marginBottom: "1.75rem" }}>
           <div style={{ fontSize: 22, fontWeight: 600, color: C.tealDark, letterSpacing: "-0.02em" }}>Physio Pro SA</div>
-          <div style={{ fontSize: 13, color: C.textSub, marginTop: 4 }}>Occupational health practice management</div>
+          <div style={{ fontSize: 13, color: C.textSub, marginTop: 4 }}>Cloud practice management for South African physiotherapists</div>
         </div>
 
         {USE_MOCK && (
@@ -301,8 +301,7 @@ export const LoginScreen = ({ onLogin }) => {
             {[
               { id: "login", label: "Sign in" },
               { id: "signup", label: "Pro account" },
-              { id: "cpd_signup", label: "Free CPD log" },
-            ].map(m => (
+                          ].map(m => (
               <button key={m.id} onClick={() => { setMode(m.id); setError(""); setConfirmPassword(""); setSancNumber(""); }} style={{ flex: 1, padding: "6px 4px", borderRadius: 6, border: "none", background: mode === m.id ? "#fff" : "transparent", color: mode === m.id ? C.text : C.textSub, fontSize: 12, fontWeight: mode === m.id ? 500 : 400, cursor: "pointer", boxShadow: mode === m.id ? "0 1px 3px rgba(0,0,0,0.1)" : "none" }}>
                 {m.label}
               </button>
@@ -357,7 +356,7 @@ export const LoginScreen = ({ onLogin }) => {
         <Btn onClick={mode === "login" ? handleLogin : mode === "signup" ? handleSignup : handleCPDSignup} disabled={loading} style={{ width: "100%", justifyContent: "center" }}>
           {loading
             ? (mode === "login" ? "Signing in..." : "Creating account...")
-            : (mode === "login" ? "Sign in" : mode === "signup" ? "Create Pro account" : "Create free CPD log")}
+            : (mode === "login" ? "Sign in" : mode === "signup" ? "Create Pro account" : "Create account")}
         </Btn>
 
         <div style={{ textAlign: "center", marginTop: "1rem", fontSize: 11, color: C.textTert }}>

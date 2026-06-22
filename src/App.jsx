@@ -112,6 +112,7 @@ export default function App() {
   const [liveNotes, setLiveNotes]         = useState(null);
   const [liveAppts, setLiveAppts]         = useState(null);
   const [liveClaims, setLiveClaims]       = useState(null);
+  const [practitionerId, setPractitionerId] = useState(null);
 
   const token = session?.access_token;
   const db    = useMemo(() => (token && !USE_MOCK) ? sbAuth(token) : null, [token]);
@@ -165,12 +166,14 @@ export default function App() {
     if (!db) return;
     setDataLoading(true);
     try {
-      const [ptRes, epRes, apptRes, clRes] = await Promise.all([
+      const [pracRes, ptRes, epRes, apptRes, clRes] = await Promise.all([
+        db.from("practitioner").select(""),
         db.from("patient").select(""),
         db.from("episode_of_care").select(""),
         db.from("appointment").select("limit=50"),
         db.from("medical_aid_claim").select("limit=100"),
       ]);
+      if (pracRes.data?.[0]) setPractitionerId(pracRes.data[0].id);
       if (ptRes.data)   setLivePatients(ptRes.data);
       if (epRes.data)   setLiveEpisodes(epRes.data);
       if (apptRes.data) setLiveAppts(apptRes.data);
@@ -192,6 +195,7 @@ export default function App() {
     if (!USE_MOCK && token) await auth.signOut(token).catch(() => {});
     setSession(null);
     [setLivePatients, setLiveEpisodes, setLiveNotes, setLiveAppts, setLiveClaims].forEach(fn => fn(null));
+    setPractitionerId(null);
     setNeedsOnboarding(false);
     localStorage.removeItem(PH_LS.SESSION);
     setScreen("dashboard");
@@ -221,7 +225,7 @@ export default function App() {
     return <OnboardingWizard session={session} onComplete={handleOnboardingComplete} />;
 
   const dataCtx = { patients, episodes, notes, appointments, claims,
-    db, token, refreshData, dataLoading, navigate,
+    db, token, refreshData, dataLoading, navigate, practitionerId,
     setLivePatients, setLiveEpisodes, setLiveNotes, setLiveAppts, setLiveClaims };
 
   return (
