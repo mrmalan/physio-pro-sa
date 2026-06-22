@@ -2,12 +2,11 @@ import React, { useState, useEffect, useRef, useMemo, createContext, useContext 
 // Screen imports removed — Physio Pro uses its own screens via App.jsx
 
 // Physio Pro SA — Auth helpers, Onboarding Wizard, Login screen
-import { APP_VERSION, Btn, C, SUPABASE_ANON, SUPABASE_URL, USE_MOCK, auth } from "../shared.js";
+import { APP_VERSION, Btn, C, SUPABASE_ANON, SUPABASE_URL, USE_MOCK, auth, sbAuth } from "../shared.js";
 
 
 
 // Supabase client with auth token support
-export { sbAuth } from "../shared.js";
 
 // ─── ONBOARDING WIZARD ────────────────────────────────────────────────────────
 export const OnboardingWizard = ({ session, onComplete }) => {
