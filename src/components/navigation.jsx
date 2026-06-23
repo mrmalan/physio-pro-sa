@@ -3,13 +3,14 @@ import { C } from "../shared.js";
 
 const NAV_ITEMS = [
   { id: "dashboard",    label: "Dashboard",      icon: "⊞" },
-  { id: "appointments", label: "Appointments",   icon: "📅" },
+  { id: "flowboard",    label: "Flowboard",      icon: "📅" },
   { id: "patients",     label: "Patients",       icon: "👤" },
+  { id: "appointments", label: "Appointments",   icon: "🗓" },
   { id: "clinical",     label: "Clinical notes", icon: "📋" },
-  { id: "episodes",     label: "Episodes",       icon: "🗂" },
-  { id: "medicalaid",   label: "Medical aid",    icon: "💳" },
+  { id: "episodes",     label: "Episodes",       icon: "💊" },
+  { id: "medicalaid",   label: "Medical aid",    icon: "🏥" },
   { id: "invoices",     label: "Invoices",       icon: "🧾" },
-  { id: "finance",      label: "Finance",        icon: "📊" },
+  { id: "finance",      label: "Finance",        icon: "💳" },
   { id: "cpd",          label: "CPD tracker",    icon: "🎓" },
   { id: "settings",     label: "Settings",       icon: "⚙" },
 ];
