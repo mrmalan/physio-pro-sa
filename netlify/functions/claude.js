@@ -1,3 +1,14 @@
+/**
+ * claude.js — Anthropic API proxy for Physio Pro SA
+ *
+ * Security: verifies the caller's Supabase JWT before forwarding.
+ * Only authenticated Physio Pro SA users can consume API credits.
+ *
+ * Required env vars:
+ *   ANTHROPIC_API_KEY    — Anthropic API key (server-side only, never exposed to browser)
+ *   SUPABASE_JWT_SECRET  — Supabase → Project Settings → API → JWT Secret
+ */
+
 import { verifyJWT, unauthorised } from "./_verify_jwt.js";
 
 export async function handler(event) {
@@ -27,35 +38,24 @@ export async function handler(event) {
   };
   if (body.system) requestBody.system = body.system;
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key":         process.env.ANTHROPIC_API_KEY,
-      "anthropic-version": "2023-06-01",
-      "content-type":      "application/json",
-    },
-    body: JSON.stringify(requestBody),
-  });
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key":         process.env.ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+        "content-type":      "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
 
-  const text = await res.text();
-  
-  // Debug: return what Anthropic actually said
-  if (!res.ok) {
+    const text = await res.text();
     return {
       statusCode: res.status,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        error: "anthropic_error",
-        status: res.status,
-        anthropic_response: text,
-        key_prefix: process.env.ANTHROPIC_API_KEY?.slice(0, 20) + "...",
-      }),
+      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      body: text,
     };
+  } catch (err) {
+    return { statusCode: 502, body: JSON.stringify({ error: err.message }) };
   }
-
-  return {
-    statusCode: 200,
-    headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-    body: text,
-  };
 }
