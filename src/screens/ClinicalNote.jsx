@@ -73,7 +73,7 @@ const SOAP_MACROS = {
 };
 
 // ── Voice-to-SOAP ─────────────────────────────────────────────────────────────
-const VoiceSOAP = ({ note, patient, episode, onResult, onClose }) => {
+const VoiceSOAP = ({ note, patient, episode, onResult, onClose, token }) => {
   const [status,     setStatus]     = useState("idle"); // idle | recording | processing | done | error
   const [transcript, setTranscript] = useState("");
   const [generated,  setGenerated]  = useState(null);
@@ -136,9 +136,7 @@ Return ONLY a JSON object with these exact keys: subjective, objective, assessme
     try {
       const res = await fetch("/.netlify/functions/claude", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json", ...(token ? { "Authorization": `Bearer ${token}` } : {}) },
         body: JSON.stringify({
           model: "claude-sonnet-4-6",
           max_tokens: 1000,
@@ -274,7 +272,7 @@ Return ONLY a JSON object with these exact keys: subjective, objective, assessme
 };
 
 // ── Discharge summary generator ───────────────────────────────────────────────
-const DischargeModal = ({ note, patient, onClose }) => {
+const DischargeModal = ({ note, patient, onClose, token }) => {
   const [text,   setText]   = useState("");
   const [status, setStatus] = useState("idle"); // idle | generating | done | error
   const [error,  setError]  = useState("");
@@ -304,7 +302,7 @@ Write in formal but clear English suitable for a South African medical context. 
     try {
       const res = await fetch("/.netlify/functions/claude", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "anthropic-version": "2023-06-01" },
+        headers: { "Content-Type": "application/json", ...(token ? { "Authorization": `Bearer ${token}` } : {}) },
         body: JSON.stringify({
           model: "claude-sonnet-4-6", max_tokens: 600,
           messages: [{ role: "user", content: prompt }],
@@ -550,7 +548,7 @@ const MacroPicker = ({ onSelect, onClose }) => (
 
 // ── Main ClinicalNote screen ──────────────────────────────────────────────────
 export const ClinicalNote = ({ navigate }) => {
-  const { patients, episodes, db, practitionerId, setLiveNotes, setLiveClaims } = useContext(DataContext);
+  const { patients, episodes, db, practitionerId, token, setLiveNotes, setLiveClaims } = useContext(DataContext);
 
   const EMPTY_NOTE = {
     patient_id: "", episode_id: "",
@@ -643,7 +641,7 @@ export const ClinicalNote = ({ navigate }) => {
           <Btn onClick={() => navigate("medicalaid")}>View claims →</Btn>
         </div>
         {showDischarge && (
-          <DischargeModal note={signedNote} patient={selectedPatient} onClose={() => setShowDischarge(false)} />
+          <DischargeModal note={signedNote} patient={selectedPatient} onClose={() => setShowDischarge(false)} token={token} />
         )}
       </div>
     );
@@ -843,7 +841,7 @@ export const ClinicalNote = ({ navigate }) => {
 
       {showVoice    && <VoiceSOAP note={note} patient={selectedPatient}
         episode={episodes.find(e => e.id === note.episode_id)}
-        onResult={handleVoiceResult} onClose={() => setShowVoice(false)} />}
+        onResult={handleVoiceResult} onClose={() => setShowVoice(false)} token={token} />}
       {showMacros   && <MacroPicker onSelect={handleMacro} onClose={() => setShowMacros(false)} />}
       {showSign     && <SignModal note={note} patient={selectedPatient}
         episode={episodes.find(e => e.id === note.episode_id)}

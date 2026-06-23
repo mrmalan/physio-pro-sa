@@ -1,16 +1,27 @@
 /**
- * claude.js — Netlify function proxy for Anthropic API
- * Keeps ANTHROPIC_API_KEY server-side, never exposed to the browser.
+ * claude.js — Anthropic API proxy for Physio Pro SA
  *
- * POST /.netlify/functions/claude
+ * Security: verifies the caller's Supabase JWT before forwarding.
+ * Only authenticated Physio Pro SA users can consume API credits.
+ *
+ * Required env vars:
+ *   ANTHROPIC_API_KEY     — Anthropic API key (server-side only)
+ *   SUPABASE_JWT_SECRET   — From Supabase → Project Settings → API → JWT Secret
+ *
+ * Client sends: Authorization: Bearer <supabase_access_token>
  * Body: { messages: [...], max_tokens?: number, system?: string }
- * Response: Anthropic /v1/messages response JSON
  */
+
+import { verifyJWT, unauthorised } from "./_verify_jwt.js";
 
 export async function handler(event) {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
   }
+
+  // Verify Supabase JWT — reject unauthenticated callers
+  const user = await verifyJWT(event);
+  if (!user) return unauthorised();
 
   if (!process.env.ANTHROPIC_API_KEY) {
     return {
@@ -34,9 +45,9 @@ export async function handler(event) {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
-        "x-api-key":             process.env.ANTHROPIC_API_KEY,
-        "anthropic-version":     "2023-06-01",
-        "Content-Type":          "application/json",
+        "x-api-key":         process.env.ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+        "Content-Type":      "application/json",
       },
       body: JSON.stringify({
         model:      "claude-sonnet-4-6",

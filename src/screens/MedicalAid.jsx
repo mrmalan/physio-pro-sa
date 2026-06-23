@@ -151,7 +151,7 @@ Write a concise (150–200 word) appeal letter addressing the rejection reason. 
     try {
       const res = await fetch("/.netlify/functions/claude", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "anthropic-version": "2023-06-01" },
+        headers: { "Content-Type": "application/json", ...(token ? { "Authorization": `Bearer ${token}` } : {}) },
         body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 500,
           messages: [{ role: "user", content: prompt }] }),
       });
@@ -471,7 +471,7 @@ const BulkExportModal = ({ claims, patients, onClose }) => {
 
 // ── Main MedicalAid screen ────────────────────────────────────────────────────
 export const MedicalAid = ({ navigate }) => {
-  const { claims, patients, episodes, db, setLiveClaims } = useContext(DataContext);
+  const { claims, patients, episodes, db, token, setLiveClaims } = useContext(DataContext);
 
   const [tab,          setTab]          = useState("claims");
   const [filter,       setFilter]       = useState("all");
