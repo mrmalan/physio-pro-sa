@@ -134,12 +134,10 @@ Return ONLY a JSON object with these exact keys: subjective, objective, assessme
 - Return valid JSON only, no markdown, no explanation`;
 
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const res = await fetch("/.netlify/functions/claude", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": "",  // handled by proxy
-          "anthropic-version": "2023-06-01",
         },
         body: JSON.stringify({
           model: "claude-sonnet-4-6",
@@ -304,7 +302,7 @@ Write a professional discharge summary letter addressed to the referring doctor.
 Write in formal but clear English suitable for a South African medical context. About 200 words.`;
 
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const res = await fetch("/.netlify/functions/claude", {
         method: "POST",
         headers: { "Content-Type": "application/json", "anthropic-version": "2023-06-01" },
         body: JSON.stringify({
