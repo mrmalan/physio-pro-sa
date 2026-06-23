@@ -61,14 +61,20 @@ const MOCK_EPISODES = [
 
 const MOCK_APPOINTMENTS = [
   { id: "a1", patient_id: "p1", episode_id: "e1",
-    scheduled_at: "2026-06-23T09:00:00Z", duration_minutes: 45,
-    status: "scheduled", appointment_type: "follow_up", room: "Room 1" },
+    scheduled_at: "2026-06-23T07:00:00Z", duration_minutes: 45,
+    status: "arrived", appointment_type: "follow_up", room: "Room 1" },
   { id: "a2", patient_id: "p2", episode_id: "e2",
-    scheduled_at: "2026-06-23T10:00:00Z", duration_minutes: 30,
-    status: "scheduled", appointment_type: "follow_up", room: "Room 2" },
+    scheduled_at: "2026-06-23T08:00:00Z", duration_minutes: 30,
+    status: "completed", appointment_type: "follow_up", room: "Room 2" },
   { id: "a3", patient_id: "p3", episode_id: null,
-    scheduled_at: "2026-06-23T11:00:00Z", duration_minutes: 60,
+    scheduled_at: "2026-06-23T09:00:00Z", duration_minutes: 60,
     status: "scheduled", appointment_type: "initial", room: "Room 1" },
+  { id: "a4", patient_id: "p4", episode_id: null,
+    scheduled_at: "2026-06-23T10:30:00Z", duration_minutes: 45,
+    status: "scheduled", appointment_type: "follow_up", room: "Room 2" },
+  { id: "a5", patient_id: "p1", episode_id: "e1",
+    scheduled_at: "2026-06-23T12:00:00Z", duration_minutes: 30,
+    status: "scheduled", appointment_type: "review", room: "Room 1" },
 ];
 
 const MOCK_NOTES = [
@@ -91,10 +97,10 @@ const MOCK_CLAIMS = [
 
 export const MOCK_SESSION = {
   access_token: "mock_token",
-  user: { id: "mock_user", email: "demo@physioprosa.co.za",
-    user_metadata: { full_name: "Demo Physiotherapist",
-      practice_name: "Demo Physio Practice", hpcsa_number: "PT000001",
-      onboarding_complete: true } },
+  user: { id: "mock_user", email: "kerry@kerryphysio.co.za",
+    user_metadata: { full_name: "Kerry Barnard",
+      practice_name: "Kerry Barnard Physiotherapy", hpcsa_number: "PT004712",
+      qualification: "BSc Physiotherapy", onboarding_complete: true } },
 };
 
 // ── Root App ──────────────────────────────────────────────────────────────────
