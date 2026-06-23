@@ -12,16 +12,6 @@ function fmtDate(d) {
   return new Date(d).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" });
 }
 
-// ── Mock invoices for Finance dashboard ───────────────────────────────────────
-// In a real session these come from DataContext; for now we use local mock
-const MOCK_FIN_INVOICES = [
-  { id:"i1", patient_id:"p1", issue_date:"2026-06-18", status:"paid",   subtotal:980,   vat_amount:147,    total:1127,   is_medical_aid:true,  scheme_code:"DISC" },
-  { id:"i2", patient_id:"p4", issue_date:"2026-06-20", status:"issued", subtotal:905,   vat_amount:135.75, total:1040.75,is_medical_aid:false, scheme_code:null   },
-  { id:"i3", patient_id:"p2", issue_date:"2026-06-05", status:"paid",   subtotal:485,   vat_amount:72.75,  total:557.75, is_medical_aid:true,  scheme_code:"BONI" },
-  { id:"i4", patient_id:"p3", issue_date:"2026-05-28", status:"overdue",subtotal:1260,  vat_amount:189,    total:1449,   is_medical_aid:false, scheme_code:null   },
-  { id:"i5", patient_id:"p1", issue_date:"2026-06-10", status:"paid",   subtotal:795,   vat_amount:119.25, total:914.25, is_medical_aid:true,  scheme_code:"DISC" },
-];
-
 // ── CSV utilities ─────────────────────────────────────────────────────────────
 function downloadCSV(content, filename) {
   const a = document.createElement("a");
@@ -91,11 +81,12 @@ const RevBar = ({ label, value, max, color }) => (
 
 // ── Main Finance screen ───────────────────────────────────────────────────────
 export const Finance = ({ navigate }) => {
-  const { patients } = useContext(DataContext);
+  const { patients, invoices: liveInvoices } = useContext(DataContext);
   const [period, setPeriod]   = useState("month");
   const [activeTab, setTab]   = useState("overview");
 
-  const invoices = MOCK_FIN_INVOICES;
+  // Use live invoices from Supabase; fall back to empty array (not mock data)
+  const invoices = liveInvoices ?? [];
 
   const filtered = useMemo(() => {
     const now = new Date();
