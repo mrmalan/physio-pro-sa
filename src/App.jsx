@@ -118,6 +118,7 @@ export default function App() {
   const [liveNotes, setLiveNotes]         = useState(null);
   const [liveAppts, setLiveAppts]         = useState(null);
   const [liveClaims, setLiveClaims]       = useState(null);
+  const [liveInvoices, setLiveInvoices]   = useState(null);
   const [practitionerId, setPractitionerId] = useState(null);
 
   const token = session?.access_token;
@@ -128,6 +129,7 @@ export default function App() {
   const notes        = liveNotes    ?? MOCK_NOTES;
   const appointments = liveAppts    ?? MOCK_APPOINTMENTS;
   const claims       = liveClaims   ?? MOCK_CLAIMS;
+  const invoices     = liveInvoices ?? [];
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
@@ -172,18 +174,22 @@ export default function App() {
     if (!db) return;
     setDataLoading(true);
     try {
-      const [pracRes, ptRes, epRes, apptRes, clRes] = await Promise.all([
+      const [pracRes, ptRes, epRes, apptRes, clRes, noteRes, invRes] = await Promise.all([
         db.from("practitioner").select(""),
         db.from("patient").select(""),
         db.from("episode_of_care").select(""),
-        db.from("appointment").select("limit=50"),
-        db.from("medical_aid_claim").select("limit=100"),
+        db.from("appointment").select("").order("scheduled_at", { ascending: false }).limit(100),
+        db.from("medical_aid_claim").select("").order("claim_date", { ascending: false }).limit(200),
+        db.from("clinical_note").select("").order("note_date", { ascending: false }).limit(200),
+        db.from("invoice").select("").order("issue_date", { ascending: false }).limit(200),
       ]);
       if (pracRes.data?.[0]) setPractitionerId(pracRes.data[0].id);
       if (ptRes.data)   setLivePatients(ptRes.data);
       if (epRes.data)   setLiveEpisodes(epRes.data);
       if (apptRes.data) setLiveAppts(apptRes.data);
       if (clRes.data)   setLiveClaims(clRes.data);
+      if (noteRes.data) setLiveNotes(noteRes.data);
+      if (invRes.data)  setLiveInvoices(invRes.data);
       const meta = session?.user?.user_metadata;
       if (!meta?.onboarding_complete && ptRes.data !== null && ptRes.data.length === 0)
         setNeedsOnboarding(true);
@@ -200,7 +206,7 @@ export default function App() {
   const handleLogout = async () => {
     if (!USE_MOCK && token) await auth.signOut(token).catch(() => {});
     setSession(null);
-    [setLivePatients, setLiveEpisodes, setLiveNotes, setLiveAppts, setLiveClaims].forEach(fn => fn(null));
+    [setLivePatients, setLiveEpisodes, setLiveNotes, setLiveAppts, setLiveClaims, setLiveInvoices].forEach(fn => fn(null));
     setPractitionerId(null);
     setNeedsOnboarding(false);
     localStorage.removeItem(PH_LS.SESSION);
@@ -230,9 +236,9 @@ export default function App() {
   if (needsOnboarding && !USE_MOCK)
     return <OnboardingWizard session={session} onComplete={handleOnboardingComplete} />;
 
-  const dataCtx = { patients, episodes, notes, appointments, claims,
+  const dataCtx = { patients, episodes, notes, appointments, claims, invoices,
     db, token, refreshData, dataLoading, navigate, practitionerId,
-    setLivePatients, setLiveEpisodes, setLiveNotes, setLiveAppts, setLiveClaims };
+    setLivePatients, setLiveEpisodes, setLiveNotes, setLiveAppts, setLiveClaims, setLiveInvoices };
 
   return (
     <AuthContext.Provider value={{ session }}>

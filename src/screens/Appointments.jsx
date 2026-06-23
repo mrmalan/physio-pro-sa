@@ -358,12 +358,30 @@ export const Appointments = ({ navigate }) => {
     return p ? `${p.first_name} ${p.last_name}` : "Unknown";
   };
 
-  const handleBook = (appt) => {
-    setLiveAppts?.(prev => prev ? [...prev, appt] : [appt]);
+  const { db, practitionerId } = useContext(DataContext);
+
+  const handleBook = async (appt) => {
+    // Optimistic update
+    setLiveAppts?.(prev => prev ? [appt, ...prev] : [appt]);
     setShowBook(false);
+    // Persist to Supabase if live
+    if (db && practitionerId) {
+      const { error } = await db.from("appointment").insert({
+        practitioner_id: practitionerId,
+        patient_id:      appt.patient_id,
+        episode_id:      appt.episode_id || null,
+        scheduled_at:    appt.scheduled_at,
+        duration_minutes: appt.duration_minutes,
+        appointment_type: appt.appointment_type,
+        room:            appt.room || null,
+        status:          "scheduled",
+        notes:           appt.notes || null,
+      });
+      if (error) console.warn("Appointment save failed:", error);
+    }
   };
 
-  const handleStatusChange = (newStatus) => {
+  const handleStatusChange = async (newStatus) => {
     if (!selAppt) return;
     const updated = { ...selAppt, status: newStatus };
     setLiveAppts?.(prev => prev
@@ -371,6 +389,10 @@ export const Appointments = ({ navigate }) => {
       : appointments.map(a => a.id === selAppt.id ? updated : a)
     );
     setSelAppt(updated);
+    // Persist status change to Supabase
+    if (db && selAppt.id && !selAppt.id.startsWith("a")) {
+      await db.from("appointment").update({ status: newStatus }).eq("id", selAppt.id);
+    }
   };
 
   const openNote = () => {

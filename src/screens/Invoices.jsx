@@ -308,34 +308,20 @@ const PaymentModal = ({ invoice, onSave, onClose }) => {
 };
 
 // ── Main Invoices screen ──────────────────────────────────────────────────────
-// Persists in App state via setLiveInvoices (passed through DataContext)
-const MOCK_INVOICES_INIT = [
-  { id: "inv1", invoice_number: "PP-1000", patient_id: "p1", issue_date: "2026-06-18",
-    due_date: "2026-07-18", icd10_primary: "M54.5",
-    lines: [
-      { id: "l1", tariff_code: "18533", description: "Follow-up consultation (>20 min)", quantity: 1, unit_amount: 485.00, line_total: 485.00 },
-      { id: "l2", tariff_code: "18543", description: "Joint mobilisation (per region)",  quantity: 1, unit_amount: 310.00, line_total: 310.00 },
-      { id: "l3", tariff_code: "18551", description: "TENS / interferential current",    quantity: 1, unit_amount: 185.00, line_total: 185.00 },
-    ],
-    subtotal: 980.00, vat_amount: 147.00, total: 1127.00,
-    status: "paid", payment_method: "Medical aid", is_medical_aid: true, scheme_code: "DISC" },
-  { id: "inv2", invoice_number: "PP-1001", patient_id: "p4", issue_date: "2026-06-20",
-    due_date: "2026-07-20", icd10_primary: "M75.1",
-    lines: [
-      { id: "l4", tariff_code: "18530", description: "Initial consultation and assessment (≤30 min)", quantity: 1, unit_amount: 485.00, line_total: 485.00 },
-      { id: "l5", tariff_code: "18540", description: "Spinal manipulation — cervical",               quantity: 1, unit_amount: 420.00, line_total: 420.00 },
-    ],
-    subtotal: 905.00, vat_amount: 135.75, total: 1040.75,
-    status: "issued", payment_method: null, is_medical_aid: false, scheme_code: null },
-];
-
 export const Invoices = ({ navigate }) => {
-  const { patients }  = useContext(DataContext);
-  const [invoices, setInvoices] = useState(MOCK_INVOICES_INIT);
+  const { patients, episodes, invoices: liveInvoices, setLiveInvoices,
+          db, practitionerId } = useContext(DataContext);
+
+  // Fall back to demo invoices when no live data (empty DB / demo mode)
+  const DEMO_INVOICES = [];
   const [filter,   setFilter]   = useState("all");
   const [showNew,  setShowNew]  = useState(false);
   const [payInv,   setPayInv]   = useState(null);
-  const { episodes } = useContext(DataContext);
+
+  const invoices = liveInvoices?.length ? liveInvoices : DEMO_INVOICES;
+  const setInvoices = (updater) => {
+    setLiveInvoices?.(typeof updater === "function" ? updater(invoices) : updater);
+  };
 
   const displayed = useMemo(() => {
     if (filter === "all") return invoices;
@@ -349,15 +335,48 @@ export const Invoices = ({ navigate }) => {
     .filter(i => i.status === "paid" && i.issue_date >= new Date().toISOString().slice(0,7))
     .reduce((s, i) => s + i.total, 0);
 
-  const handleCreate = (inv) => {
+  const handleCreate = async (inv) => {
+    // Optimistic update
     setInvoices(prev => [inv, ...prev]);
     setShowNew(false);
+    // Persist to Supabase if live
+    if (db && practitionerId) {
+      const { data: invData, error: invErr } = await db.from("invoice").insert({
+        practitioner_id: practitionerId,
+        patient_id:      inv.patient_id,
+        invoice_number:  inv.invoice_number,
+        issue_date:      inv.issue_date,
+        due_date:        inv.due_date || null,
+        status:          "draft",
+        subtotal:        inv.subtotal,
+        vat_amount:      inv.vat_amount,
+        total:           inv.total,
+        notes:           inv.notes || null,
+      });
+      if (invErr) { console.warn("Invoice save failed:", invErr); return; }
+      const savedInvId = invData?.[0]?.id;
+      if (savedInvId && inv.lines?.length) {
+        await db.from("invoice_line").insert(inv.lines.map(l => ({
+          invoice_id:   savedInvId,
+          description:  l.description,
+          tariff_code:  l.tariff_code || null,
+          icd10_code:   inv.icd10_primary || null,
+          quantity:     l.quantity,
+          unit_amount:  l.unit_amount,
+          vat_rate:     0.15,
+          line_total:   l.line_total,
+        })));
+      }
+    }
   };
 
-  const handleMarkPaid = (method, ref) => {
-    setInvoices(prev => prev.map(i => i.id === payInv.id
-      ? { ...i, status: "paid", payment_method: method, payment_ref: ref } : i));
+  const handleMarkPaid = async (method, ref) => {
+    const updated = { ...payInv, status: "paid", payment_method: method, payment_ref: ref };
+    setInvoices(prev => prev.map(i => i.id === payInv.id ? updated : i));
     setPayInv(null);
+    if (db && payInv.id && !String(payInv.id).startsWith("inv")) {
+      await db.from("invoice").update({ status: "paid", notes: `Paid via ${method}${ref ? ` ref ${ref}` : ""}` }).eq("id", payInv.id);
+    }
   };
 
   const exportXero = () => {

@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
-import { C, Card, Btn, Badge } from "../shared.js";
+import { useState, useEffect, useContext } from "react";
+import { C, Card, Btn, Badge, DataContext } from "../shared.js";
 
-const PH_CPD_KEY = "ph_cpd_activities";
 const HPCSA_POINTS_REQUIRED = 30; // HPCSA: 30 CEUs per 2-year cycle for physios
 
 const CPD_CATEGORIES = [
@@ -13,25 +12,45 @@ const CPD_CATEGORIES = [
   { id: "other",      label: "Other" },
 ];
 
-const loadActivities = () => { try { return JSON.parse(localStorage.getItem(PH_CPD_KEY) || "[]"); } catch { return []; } };
-const saveActivities = (a) => localStorage.setItem(PH_CPD_KEY, JSON.stringify(a));
-
 export const CPDTracker = ({ session }) => {
-  const [activities, setActivities] = useState(loadActivities);
+  const { db, practitionerId } = useContext(DataContext);
+  const [activities, setActivities] = useState([]);
+  const [loading,  setLoading]      = useState(false);
   const [showAdd, setShowAdd]       = useState(false);
   const [form, setForm]             = useState({ title: "", provider: "", date: "", points: "", category: "clinical", notes: "" });
 
-  useEffect(() => saveActivities(activities), [activities]);
+  // Load from Supabase on mount
+  useEffect(() => {
+    if (!db || !practitionerId) return;
+    setLoading(true);
+    db.from("cpd_activity").select("").eq("practitioner_id", practitionerId)
+      .order("activity_date", { ascending: false })
+      .then(({ data }) => { if (data) setActivities(data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [practitionerId]);
 
   const totalPoints = activities.reduce((s, a) => s + Number(a.points || 0), 0);
   const pct = Math.min(100, Math.round((totalPoints / HPCSA_POINTS_REQUIRED) * 100));
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  const addActivity = () => {
+  const addActivity = async () => {
     if (!form.title || !form.date || !form.points) return;
-    setActivities(prev => [...prev, { ...form, id: Date.now().toString(), points: Number(form.points) }]);
+    const activity = { ...form, id: Date.now().toString(), points: Number(form.points) };
+    setActivities(prev => [...prev, activity]);
     setForm({ title: "", provider: "", date: "", points: "", category: "clinical", notes: "" });
     setShowAdd(false);
+    if (db && practitionerId) {
+      const { error } = await db.from("cpd_activity").insert({
+        practitioner_id: practitionerId,
+        title:         form.title,
+        provider:      form.provider || null,
+        activity_date: form.date,
+        points:        Number(form.points),
+        category:      form.category,
+        notes:         form.notes || null,
+      });
+      if (error) console.warn("CPD save failed:", error);
+    }
   };
 
   return (
@@ -89,8 +108,12 @@ export const CPDTracker = ({ session }) => {
               <div style={{ fontSize: 12, color: C.textSub }}>{a.provider} · {a.date} · {CPD_CATEGORIES.find(c => c.id === a.category)?.label}</div>
             </div>
             <div style={{ fontWeight: 700, color: C.teal }}>{a.points} CEU</div>
-            <button onClick={() => setActivities(prev => prev.filter(x => x.id !== a.id))}
-              style={{ background: "none", border: "none", cursor: "pointer", color: C.textSub, fontSize: 16 }}>×</button>
+            <button onClick={async () => {
+              setActivities(prev => prev.filter(x => x.id !== a.id));
+              if (db && a.id && !String(a.id).match(/^\d+$/)) {
+                await db.from("cpd_activity").delete().eq("id", a.id);
+              }
+            }} style={{ background: "none", border: "none", cursor: "pointer", color: C.textSub, fontSize: 16 }}>×</button>
           </div>
         ))}
       </Card>
