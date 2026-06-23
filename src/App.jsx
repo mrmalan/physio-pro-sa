@@ -16,6 +16,7 @@ import { MedicalAid }   from "./screens/MedicalAid.jsx";
 import { Invoices }     from "./screens/Invoices.jsx";
 import { Finance }      from "./screens/Finance.jsx";
 import { CPDTracker }   from "./screens/CPDTracker.jsx";
+import { Flowboard }    from "./screens/Flowboard.jsx";
 import { Settings }     from "./screens/Settings.jsx";
 
 // Navigation
@@ -264,6 +265,7 @@ export default function App() {
               {screen === "invoices"     && <Invoices     navigate={navigate} />}
               {screen === "finance"      && <Finance      navigate={navigate} />}
               {screen === "cpd"          && <CPDTracker   session={session} />}
+              {screen === "flowboard"    && <Flowboard    navigate={navigate} />}
               {screen === "settings"     && <Settings     session={session} />}
             </div>
           </div>
